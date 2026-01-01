@@ -1,4 +1,4 @@
-Get notified for DMs bypassing Do Not Disturb.
+Bypass Do Not Disturb for DMs from specific people.
 
 Like Emergency Bypass on iPhone, messages from selected contacts will always come through with sound and notification, regardless of your status.
 

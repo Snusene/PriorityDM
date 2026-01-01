@@ -1,7 +1,7 @@
 /**
  * @name PriorityDM
  * @author Snues
- * @description Get notified for DMs bypassing Do Not Disturb. Right click a user to add them.
+ * @description Bypass Do Not Disturb for DMs from specific people. Right click a user to add them.
  * @version 1.0.0
  * @source https://github.com/Snusene/PriorityDM
  */
