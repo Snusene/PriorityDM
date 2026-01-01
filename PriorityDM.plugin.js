@@ -2,7 +2,7 @@
  * @name PriorityDM
  * @author Snues
  * @description Bypass Do Not Disturb for DMs from specific people. Right click a user to add them.
- * @version 1.0.0
+ * @version 1.0.1
  * @source https://github.com/Snusene/PriorityDM
  */
 
@@ -10,6 +10,7 @@ module.exports = class PriorityDM {
     constructor() {
         this.priorityUsers = new Set();
         this.lastPing = 0;
+        this.onMessage = this.onMessage.bind(this);
     }
 
     start() {
@@ -18,12 +19,13 @@ module.exports = class PriorityDM {
         this.PresenceStore = BdApi.Webpack.getStore("PresenceStore");
         this.ChannelStore = BdApi.Webpack.getStore("ChannelStore");
         this.NotificationModule = BdApi.Webpack.getByKeys("showNotification", "requestPermission");
-        this.patchDispatcher();
+        this.Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
+        this.Dispatcher?.subscribe("MESSAGE_CREATE", this.onMessage);
         this.patchContextMenu();
     }
 
     stop() {
-        BdApi.Patcher.unpatchAll("PriorityDM");
+        this.Dispatcher?.unsubscribe("MESSAGE_CREATE", this.onMessage);
         if (this.unpatchContextMenu) this.unpatchContextMenu();
         this.saveSettings();
     }
@@ -50,7 +52,7 @@ module.exports = class PriorityDM {
                 BdApi.ContextMenu.buildItem({ type: "separator" }),
                 BdApi.ContextMenu.buildItem({
                     type: "toggle",
-                    label: "Priority DMs",
+                    label: "Priority DM",
                     checked: isPriority,
                     action: () => {
                         if (isPriority) this.priorityUsers.delete(userId);
@@ -62,16 +64,7 @@ module.exports = class PriorityDM {
         });
     }
 
-    patchDispatcher() {
-        const Dispatcher = BdApi.Webpack.getByKeys("dispatch", "subscribe");
-        if (!Dispatcher) return;
-
-        BdApi.Patcher.after("PriorityDM", Dispatcher, "dispatch", (_, [event]) => {
-            if (event?.type === "MESSAGE_CREATE") this.handleMessage(event);
-        });
-    }
-
-    handleMessage(event) {
+    onMessage(event) {
         const { message } = event;
         if (!message?.author || event.optimistic) return;
 
